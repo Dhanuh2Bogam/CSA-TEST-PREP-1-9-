@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Java Quiz</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  #quiz-root {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e0e0dc;
+    padding: 2rem;
+    max-width: 740px;
+    width: 100%;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 14px; color: #666; margin-bottom: 1.5rem; }
+  .progress-bar-bg { height: 4px; background: #e5e5e0; border-radius: 2px; margin-bottom: 1.5rem; }
+  .progress-bar-fill { height: 4px; background: #2563eb; border-radius: 2px; transition: width 0.4s; }
+  .q-meta { font-size: 13px; color: #888; margin-bottom: 0.4rem; }
+  .q-text { font-size: 16px; font-weight: 500; color: #1a1a1a; margin-bottom: 1.1rem; line-height: 1.55; margin-top: 0.6rem; }
+  .q-code {
+    background: #f8f8f6;
+    border: 1px solid #e0e0dc;
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    font-family: "Fira Mono", "Courier New", monospace;
+    font-size: 12.5px;
+    color: #1a1a1a;
+    margin-bottom: 1.25rem;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.65;
+  }
+  .difficulty {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .diff-easy   { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+  .diff-medium { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+  .diff-hard   { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    text-align: left;
+    background: #fff;
+    border: 1px solid #d0d0cc;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 14px;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+  .opt-btn:hover:not(:disabled) { background: #f5f5f3; border-color: #999; }
+  .opt-btn.correct { background: #ecfdf5; border-color: #059669; color: #065f46; }
+  .opt-btn.wrong   { background: #fef2f2; border-color: #dc2626; color: #991b1b; }
+  .opt-btn.reveal  { background: #ecfdf5; border-color: #059669; color: #065f46; opacity: 0.65; }
+  .feedback {
+    margin-top: 1rem;
+    font-size: 13.5px;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid;
+    line-height: 1.6;
+  }
+  .feedback.correct { background: #ecfdf5; border-color: #6ee7b7; color: #065f46; }
+  .feedback.wrong   { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+  .nav-row { display: flex; justify-content: flex-end; margin-top: 1.25rem; }
+  .next-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 14px;
+    border: 1px solid #d0d0cc;
+    border-radius: 8px;
+    background: transparent;
+    color: #1a1a1a;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+  }
+  .next-btn:hover { background: #f5f5f3; }
+  .score-card { text-align: center; padding: 2rem 1rem; }
+  .score-num { font-size: 56px; font-weight: 600; color: #1a1a1a; }
+  .score-label { font-size: 15px; color: #888; margin-bottom: 0.4rem; }
+  .score-breakdown { font-size: 13px; color: #aaa; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 16px; color: #444; margin-bottom: 2rem; line-height: 1.5; }
+  .restart-btn {
+    padding: 0.65rem 2rem;
+    font-size: 15px;
+    border: 1px solid #d0d0cc;
+    border-radius: 8px;
+    background: transparent;
+    color: #1a1a1a;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+  }
+  .restart-btn:hover { background: #f5f5f3; }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: #f0f0ec;
+    color: #666;
+    border: 1px solid #e0e0dc;
+  }
+</style>
+</head>
+<body>
+<div id="quiz-root">
+  <h1>Java Quiz</h1>
+  <p class="subtitle">40 questions · Arrays, Inheritance, Polymorphism, Static vs Instance, Code Analysis</p>
+</div>
+<script>
+const questions = [
+  // ── ORIGINAL 20 ──────────────────────────────────────────────────────────
+  { tag:"Arrays", difficulty:"easy",
+    text:"Which line correctly uses shorthand notation to create an array?",
+    options:["int[] nums = new int[]{1,2,3};","int[] nums = {1, 2, 3};","int nums[] = new int(3);","int[] nums = new int[3]{1,2,3};"],
+    answer:1,
+    explanation:"Shorthand (initializer list) notation uses curly braces directly: int[] nums = {1, 2, 3};"
+  },
+  { tag:"Arrays", difficulty:"easy",
+    text:"What is printed by this code?",
+    code:"int[] arr = {10, 20, 30, 40};\narr[2] = 99;\nSystem.out.println(arr[1] + arr[2]);",
+    options:["50","119","20","139"],
+    answer:1,
+    explanation:"arr[1] is 20, arr[2] was set to 99. 20 + 99 = 119."
+  },
+  { tag:"Inheritance", difficulty:"easy",
+    text:"Which keyword is used to make a class inherit from another class in Java?",
+    options:["implements","inherits","extends","super"],
+    answer:2,
+    explanation:"The extends keyword establishes an inheritance relationship: class Dog extends Animal {}"
+  },
+  { tag:"Inheritance", difficulty:"easy",
+    text:"In an inheritance diagram, what is another name for the superclass?",
+    options:["Derived class","Child class","Base class","Subclass"],
+    answer:2,
+    explanation:"Superclass = base class = parent class. Subclass = derived class = child class."
+  },
+  { tag:"Polymorphism", difficulty:"medium",
+    text:'What does this code print? Assume Animal has toString() returning "Animal", and Dog overrides it returning "Dog".',
+    code:'Animal a = new Dog();\nSystem.out.println(a.toString());',
+    options:["Animal","Dog","Compile error","null"],
+    answer:1,
+    explanation:"This is polymorphism. Even though a is declared as Animal, it references a Dog object, so Dog's overridden toString() runs at runtime."
+  },
+  { tag:"Static vs Instance", difficulty:"easy",
+    text:"Which statement about static fields is TRUE?",
+    options:["Each object has its own copy of a static field","Static fields are only accessible inside constructors","A static field is shared across all instances of a class","Static fields must be private"],
+    answer:2,
+    explanation:"Static fields belong to the class, not to any individual object. All instances share the same static field."
+  },
+  { tag:"Static vs Instance", difficulty:"easy",
+    text:"Which method can be called without creating an object?",
+    options:["An instance method","A static method","A constructor","A mutator method"],
+    answer:1,
+    explanation:"Static methods belong to the class and can be called as ClassName.method() without instantiating an object."
+  },
+  { tag:"Vocabulary", difficulty:"easy",
+    text:'What does "instantiating" a class mean?',
+    options:["Declaring a variable of that type","Creating a new object of that class using new","Inheriting from that class","Calling a static method on that class"],
+    answer:1,
+    explanation:"Instantiating means creating an instance (object) of a class using the new keyword, e.g. Dog d = new Dog();"
+  },
+  { tag:"Vocabulary", difficulty:"easy",
+    text:"A method that returns the value of a private field is called a(n):",
+    options:["Mutator","Constructor","Accessor (getter)","Static method"],
+    answer:2,
+    explanation:"An accessor (or getter) retrieves the value of an instance field. A mutator (setter) changes it."
+  },
+  { tag:"Vocabulary", difficulty:"medium",
+    text:"Which pair correctly matches the terms?",
+    options:["Encapsulation = allowing all fields to be public","Parameter = value passed by the caller; Argument = variable in the method signature","Encapsulation = hiding internal data behind private fields and public methods","Primitive type = a reference to an object"],
+    answer:2,
+    explanation:"Encapsulation means bundling data (fields) and behavior (methods) and hiding internal details using access modifiers."
+  },
+  { tag:"Reference Semantics", difficulty:"medium",
+    text:"What is printed?",
+    code:"int[] a = {1, 2, 3};\nint[] b = a;\nb[0] = 99;\nSystem.out.println(a[0]);",
+    options:["1","99","Compile error","0"],
+    answer:1,
+    explanation:"Arrays use reference semantics. b and a point to the same array, so changing b[0] also changes a[0]."
+  },
+  { tag:"Vocabulary", difficulty:"easy",
+    text:"Which of the following is a primitive type in Java?",
+    options:["String","int","Array","Object"],
+    answer:1,
+    explanation:"int is a primitive type. String, Array, and Object are reference types (objects)."
+  },
+  { tag:"Super Constructor", difficulty:"medium",
+    text:"When must a call to super() appear in a subclass constructor?",
+    options:["It can appear anywhere in the constructor body","It must be the last statement","It must be the first statement","It's optional and never required"],
+    answer:2,
+    explanation:"If used, super() must be the very first statement in the subclass constructor so the parent class is initialized first."
+  },
+  { tag:"Private Fields", difficulty:"medium",
+    text:"Class Animal has a private field: private String name. Class Dog extends Animal. What happens if Dog tries to access name directly?",
+    options:["It works fine because Dog is a subclass","It causes a compile error — private fields are not accessible in subclasses","It returns null","It works only if Dog is in the same package"],
+    answer:1,
+    explanation:"private means only the declaring class can access the field directly. Subclasses must use public/protected getter methods."
+  },
+  { tag:"toString", difficulty:"easy",
+    text:"What is the purpose of overriding the toString() method?",
+    options:["To convert int to String automatically","To define how an object is printed as a String","To compare two objects for equality","To copy an object"],
+    answer:1,
+    explanation:"Overriding toString() from Object lets you define a meaningful String representation for your object, which is used by println() and string concatenation."
+  },
+  { tag:"Math.random", difficulty:"easy",
+    text:"What range of values can Math.random() return?",
+    options:["0 to 1, inclusive on both ends","0.0 (inclusive) to 1.0 (exclusive)","1 to 100","0 to 100 (inclusive)"],
+    answer:1,
+    explanation:"Math.random() returns a double in [0.0, 1.0) — includes 0.0 but never reaches 1.0."
+  },
+  { tag:"this keyword", difficulty:"easy",
+    text:"What is the main use of the this keyword inside a constructor?",
+    options:["To call a method in the superclass","To refer to the current object's instance fields when parameter names match field names","To create a new instance of the class","To call a static method"],
+    answer:1,
+    explanation:"this.fieldName distinguishes the instance field from a parameter with the same name, e.g. this.name = name;"
+  },
+  { tag:"Inheritance", difficulty:"medium",
+    text:"A parent class reference can hold a child class object. Which term best describes this?",
+    options:["Encapsulation","Overloading","Polymorphism","Static binding"],
+    answer:2,
+    explanation:"Polymorphism allows a parent-type variable (Animal a) to reference a child object (new Dog()), enabling flexible, extensible code."
+  },
+  { tag:"Static vs Instance", difficulty:"medium",
+    text:"Which is true about instance methods vs static methods?",
+    options:["Instance methods can only call static methods","Static methods can directly access instance fields without an object","Instance methods operate on a specific object; static methods do not require one","There is no functional difference"],
+    answer:2,
+    explanation:"Instance methods use this and operate on an object's specific data. Static methods belong to the class and cannot access instance fields directly."
+  },
+  { tag:"Tracing Code", difficulty:"medium",
+    text:"What is printed?",
+    code:'class Shape {\n  public String name() { return "Shape"; }\n}\nclass Circle extends Shape {\n  public String name() { return "Circle"; }\n}\n\nShape s = new Circle();\nSystem.out.println(s.name());',
+    options:["Shape","Circle","ShapeCircle","Compile error"],
+    answer:1,
+    explanation:'At runtime, the actual object type (Circle) determines which name() runs. Circle\'s override returns "Circle".'
+  },
+
+  // ── 20 HARDER QUESTIONS ───────────────────────────────────────────────────
+  { tag:"Tracing Code", difficulty:"hard",
+    text:"What is the output of this program?",
+    code:'class Vehicle {\n  private int speed;\n  public Vehicle(int speed) { this.speed = speed; }\n  public int getSpeed() { return speed; }\n  public String describe() {\n    return "Vehicle at " + speed;\n  }\n}\nclass Car extends Vehicle {\n  private String brand;\n  public Car(String brand, int speed) {\n    super(speed);\n    this.brand = brand;\n  }\n  public String describe() {\n    return brand + " going " + getSpeed();\n  }\n}\n\nVehicle v = new Car("Toyota", 60);\nSystem.out.println(v.describe());',
+    options:["Vehicle at 60","Toyota going 60","Compile error — brand is private","null"],
+    answer:1,
+    explanation:"v holds a Car. describe() is overridden in Car, so Car's version runs. getSpeed() is an inherited public accessor returning the private speed field set via super(speed). Output: Toyota going 60."
+  },
+  { tag:"Static vs Instance", difficulty:"hard",
+    text:"What does this program print?",
+    code:'class Counter {\n  private static int count = 0;\n  private int id;\n  public Counter() {\n    count++;\n    this.id = count;\n  }\n  public static int getCount() { return count; }\n  public int getId() { return id; }\n}\n\nCounter a = new Counter();\nCounter b = new Counter();\nCounter c = new Counter();\nSystem.out.println(a.getId() + " " +\n                   c.getId() + " " +\n                   Counter.getCount());',
+    options:["1 3 3","1 2 3","0 2 3","3 3 3"],
+    answer:0,
+    explanation:"count is static and increments each time a Counter is created. a.id=1, b.id=2, c.id=3. getCount()=3. Output: 1 3 3."
+  },
+  { tag:"Super Constructor", difficulty:"hard",
+    text:"What is printed?",
+    code:'class Animal {\n  public Animal() {\n    System.out.print("A ");\n  }\n  public Animal(String name) {\n    this();\n    System.out.print(name + " ");\n  }\n}\nclass Dog extends Animal {\n  public Dog() {\n    super("Buddy");\n    System.out.print("D");\n  }\n}\n\nnew Dog();',
+    options:["A Buddy D","D Buddy A","A D Buddy","Buddy A D"],
+    answer:0,
+    explanation:"Dog() calls super(\"Buddy\") → Animal(String) calls this() → Animal() prints 'A'. Back in Animal(String): prints 'Buddy '. Back in Dog(): prints 'D'. Output: A Buddy D."
+  },
+  { tag:"Reference Semantics", difficulty:"hard",
+    text:"What is the output?",
+    code:'class Box {\n  public int value;\n  public Box(int v) { this.value = v; }\n}\n\nstatic void doubleIt(Box b) {\n  b.value *= 2;\n}\nstatic void doubleInt(int x) {\n  x *= 2;\n}\n\nBox box = new Box(5);\nint n = 5;\ndoubleIt(box);\ndoubleInt(n);\nSystem.out.println(box.value + " " + n);',
+    options:["10 10","5 5","10 5","5 10"],
+    answer:2,
+    explanation:"Objects use reference semantics — doubleIt modifies the actual Box so box.value becomes 10. Primitives use value semantics — doubleInt gets a copy, so n stays 5. Output: 10 5."
+  },
+  { tag:"Polymorphism", difficulty:"hard",
+    text:"What is printed by this code?",
+    code:'class A {\n  public String whoAmI() { return "A"; }\n  public String call() {\n    return "From " + whoAmI();\n  }\n}\nclass B extends A {\n  public String whoAmI() { return "B"; }\n}\n\nA obj = new B();\nSystem.out.println(obj.call());',
+    options:["From A","From B","Compile error","From AB"],
+    answer:1,
+    explanation:"obj.call() uses A's call() which internally calls whoAmI(). Because obj is a B at runtime, B's whoAmI() is dispatched dynamically. Output: From B."
+  },
+  { tag:"Arrays", difficulty:"hard",
+    text:"What does this code print?",
+    code:"int[] nums = {5, 3, 8, 1, 9};\nint max = nums[0];\nfor (int i = 1; i < nums.length; i++) {\n  if (nums[i] > max) {\n    max = nums[i];\n  }\n}\nnums[0] = max;\nSystem.out.println(nums[0] + \" \" + nums[4]);",
+    options:["9 9","5 9","9 5","8 9"],
+    answer:0,
+    explanation:"The loop finds max=9 (at index 4). nums[0] is then set to 9. nums[4] is still 9. Output: 9 9."
+  },
+  { tag:"toString", difficulty:"hard",
+    text:"Which output is produced?",
+    code:'class Person {\n  private String name;\n  public Person(String name) { this.name = name; }\n  public String toString() {\n    return "Person(" + name + ")";\n  }\n}\nclass Student extends Person {\n  private int grade;\n  public Student(String name, int grade) {\n    super(name);\n    this.grade = grade;\n  }\n  public String toString() {\n    return super.toString() + "/Grade:" + grade;\n  }\n}\n\nPerson p = new Student("Ali", 11);\nSystem.out.println(p);',
+    options:["Person(Ali)","Person(Ali)/Grade:11","Student(Ali)/Grade:11","Compile error"],
+    answer:1,
+    explanation:"p holds a Student. println calls Student's toString() which calls super.toString() = \"Person(Ali)\", then appends \"/Grade:11\". Output: Person(Ali)/Grade:11."
+  },
+  { tag:"Static vs Instance", difficulty:"hard",
+    text:"What is printed?",
+    code:'class Bank {\n  private static double interestRate = 0.05;\n  private double balance;\n  public Bank(double balance) { this.balance = balance; }\n  public static void setRate(double r) { interestRate = r; }\n  public double interest() { return balance * interestRate; }\n}\n\nBank b1 = new Bank(1000);\nBank b2 = new Bank(2000);\nBank.setRate(0.10);\nSystem.out.println(b1.interest() + " " + b2.interest());',
+    options:["50.0 100.0","100.0 200.0","50.0 200.0","100.0 100.0"],
+    answer:1,
+    explanation:"setRate(0.10) changes the static interestRate for ALL instances. b1.interest()=1000*0.10=100.0, b2.interest()=2000*0.10=200.0. Output: 100.0 200.0."
+  },
+  { tag:"Reference Semantics", difficulty:"hard",
+    text:"Carefully trace this code. What is printed?",
+    code:'class Num {\n  private int val;\n  public Num(int v) { this.val = v; }\n  public int getVal() { return val; }\n  public void add(Num other) { this.val += other.val; }\n}\n\nNum x = new Num(10);\nNum y = new Num(3);\nNum z = x;\nz.add(y);\nx.add(z);\nSystem.out.println(x.getVal() + " " +\n                   y.getVal() + " " +\n                   z.getVal());',
+    options:["13 3 13","26 3 26","23 3 13","26 3 13"],
+    answer:1,
+    explanation:"z = x means z and x reference the SAME object. z.add(y): x.val = 10+3 = 13. x.add(z): z IS x, so x.val = 13+13 = 26. y unchanged=3. z.getVal()=26 (same as x). Output: 26 3 26."
+  },
+  { tag:"Math.random", difficulty:"medium",
+    text:"Which expression produces a random integer from 1 to 6 inclusive (simulating a die roll)?",
+    options:["(int)(Math.random() * 6)","(int)(Math.random() * 6) + 1","(int)(Math.random() * 7)","Math.random() * 6 + 1"],
+    answer:1,
+    explanation:"Math.random() gives [0.0,1.0). *6 gives [0.0,6.0). Casting to int gives 0–5. +1 shifts to 1–6."
+  },
+  { tag:"Polymorphism", difficulty:"hard",
+    text:"What is the output? (Method overloading resolution is at compile time.)",
+    code:'class Printer {\n  public void print(Object o) {\n    System.out.println("Object: " + o);\n  }\n  public void print(String s) {\n    System.out.println("String: " + s);\n  }\n}\n\nPrinter p = new Printer();\nObject x = "hello";\np.print(x);\np.print("hello");',
+    options:["String: hello\nString: hello","Object: hello\nString: hello","Object: hello\nObject: hello","String: hello\nObject: hello"],
+    answer:1,
+    explanation:"Overloading is resolved at COMPILE time based on declared type. x is declared Object so print(Object) is chosen. The literal \"hello\" is a String so print(String) is chosen. Output: Object: hello then String: hello."
+  },
+  { tag:"Tracing Code", difficulty:"hard",
+    text:"What does this program output?",
+    code:'class Shape {\n  private String color;\n  public Shape(String color) { this.color = color; }\n  public String getColor() { return color; }\n  public double area() { return 0; }\n  public String toString() {\n    return getColor() + " shape, area=" + area();\n  }\n}\nclass Rectangle extends Shape {\n  private double w, h;\n  public Rectangle(String color, double w, double h) {\n    super(color);\n    this.w = w; this.h = h;\n  }\n  public double area() { return w * h; }\n}\n\nShape[] shapes = {\n  new Shape("red"),\n  new Rectangle("blue", 3, 4)\n};\nfor (Shape s : shapes) {\n  System.out.println(s);\n}',
+    options:["red shape, area=0.0\nblue shape, area=12.0","red shape, area=0\nblue shape, area=12","red shape, area=0.0\nblue Rectangle, area=12.0","Compile error"],
+    answer:0,
+    explanation:"toString() in Shape calls area() polymorphically. Shape.area()=0.0 (double), Rectangle.area()=12.0. Doubles print with .0. Output: red shape, area=0.0 then blue shape, area=12.0."
+  },
+  { tag:"Private Fields", difficulty:"hard",
+    text:"What happens when this code is compiled?",
+    code:'class Animal {\n  private String sound = "...";\n  public String getSound() { return sound; }\n}\nclass Cat extends Animal {\n  public String getSound() {\n    return sound + "meow"; // line A\n  }\n}\n\nAnimal a = new Cat();\nSystem.out.println(a.getSound());',
+    options:["...meow","meow","Compile error at line A — sound is private in Animal","nullmeow"],
+    answer:2,
+    explanation:"sound is private in Animal. Cat cannot directly access it — this causes a compile error at line A. Cat should call super.getSound() instead."
+  },
+  { tag:"Super Constructor", difficulty:"hard",
+    text:"What is the output?",
+    code:'class Vehicle {\n  private String type;\n  private int year;\n  public Vehicle(String type, int year) {\n    this.type = type;\n    this.year = year;\n  }\n  public String toString() { return year + " " + type; }\n}\nclass Truck extends Vehicle {\n  private double payload;\n  public Truck(int year, double payload) {\n    super("Truck", year);\n    this.payload = payload;\n  }\n  public String toString() {\n    return super.toString() + ", payload=" + payload;\n  }\n}\n\nSystem.out.println(new Truck(2020, 5.5));',
+    options:["2020 Truck, payload=5.5","Truck 2020, payload=5.5","2020 Truck","Compile error"],
+    answer:0,
+    explanation:"Truck's toString calls super.toString() which returns year + \" \" + type = \"2020 Truck\", then appends \", payload=5.5\". Output: 2020 Truck, payload=5.5."
+  },
+  { tag:"Arrays", difficulty:"hard",
+    text:"What is printed?",
+    code:'class Holder {\n  public int x;\n  public Holder(int x) { this.x = x; }\n}\n\nHolder[] arr = new Holder[3];\nfor (int i = 0; i < arr.length; i++) {\n  arr[i] = new Holder(i * 10);\n}\narr[1].x += 5;\nHolder temp = arr[0];\narr[0] = arr[2];\narr[2] = temp;\n\nfor (Holder h : arr) {\n  System.out.print(h.x + " ");\n}',
+    options:["0 15 20 ","20 15 0 ","0 10 20 ","20 5 0 "],
+    answer:1,
+    explanation:"Initial: arr[0].x=0, arr[1].x=10, arr[2].x=20. arr[1].x+=5 → 15. Swap arr[0] and arr[2] references: arr[0].x=20, arr[1].x=15, arr[2].x=0. Output: 20 15 0."
+  },
+  { tag:"Tracing Code", difficulty:"hard",
+    text:"What does this output?",
+    code:"class Node {\n  public int data;\n  public Node next;\n  public Node(int d) { data = d; next = null; }\n}\n\nNode head = new Node(1);\nhead.next = new Node(2);\nhead.next.next = new Node(3);\n\nNode curr = head;\nint sum = 0;\nwhile (curr != null) {\n  sum += curr.data;\n  curr = curr.next;\n}\nSystem.out.println(sum);",
+    options:["3","6","1","Compile error"],
+    answer:1,
+    explanation:"Linked list traversal: visits nodes with data 1, 2, 3. sum = 1+2+3 = 6."
+  },
+  { tag:"this keyword", difficulty:"hard",
+    text:"What is printed?",
+    code:'class Point {\n  private double x, y;\n  public Point(double x, double y) {\n    this.x = x; this.y = y;\n  }\n  public Point translate(double x, double y) {\n    return new Point(this.x + x, this.y + y);\n  }\n  public String toString() {\n    return "(" + x + ", " + y + ")";\n  }\n}\n\nPoint p = new Point(1.0, 2.0);\nPoint q = p.translate(3.0, -1.0);\np = p.translate(0.0, 0.0);\nSystem.out.println(q + " " + p);',
+    options:["(4.0, 1.0) (1.0, 2.0)","(4.0, 1.0) (4.0, 1.0)","(1.0, 2.0) (1.0, 2.0)","(3.0, -1.0) (1.0, 2.0)"],
+    answer:0,
+    explanation:"translate() returns a NEW Point without mutating. q = p.translate(3,-1) = (4.0,1.0). p = p.translate(0,0) = new Point(1.0,2.0). Output: (4.0, 1.0) (1.0, 2.0)."
+  },
+  { tag:"Inheritance", difficulty:"hard",
+    text:"What is the output? Think carefully about field vs method resolution.",
+    code:'class A {\n  public int x = 1;\n  public int getX() { return x; }\n}\nclass B extends A {\n  public int x = 2;\n  public int getX() { return x; }\n}\n\nA obj = new B();\nSystem.out.println(obj.x + " " + obj.getX());',
+    options:["2 2","1 2","1 1","2 1"],
+    answer:1,
+    explanation:"Field access (obj.x) is resolved at COMPILE time using declared type A, so obj.x = 1. Method calls (obj.getX()) use runtime type B via dynamic dispatch, returning B's x = 2. Output: 1 2."
+  },
+  { tag:"Tracing Code", difficulty:"hard",
+    text:"What does this program print?",
+    code:"class MathHelper {\n  public static int mystery(int n) {\n    if (n <= 1) return n;\n    return mystery(n - 1) + mystery(n - 2);\n  }\n}\n\nfor (int i = 0; i <= 5; i++) {\n  System.out.print(MathHelper.mystery(i) + \" \");\n}",
+    options:["0 1 1 2 3 5 ","1 1 2 3 5 8 ","0 1 2 3 4 5 ","1 2 3 5 8 13 "],
+    answer:0,
+    explanation:"mystery() computes Fibonacci numbers recursively. mystery(0)=0, mystery(1)=1, mystery(2)=1, mystery(3)=2, mystery(4)=3, mystery(5)=5. Output: 0 1 1 2 3 5."
+  },
+  { tag:"Static vs Instance", difficulty:"hard",
+    text:"What is the final output?",
+    code:'class Game {\n  private static int totalScore = 0;\n  private int playerScore;\n  private String name;\n\n  public Game(String name, int score) {\n    this.name = name;\n    this.playerScore = score;\n    totalScore += score;\n  }\n  public static int getTotal() { return totalScore; }\n  public void bonus(int b) {\n    playerScore += b;\n    totalScore += b;\n  }\n  public String toString() {\n    return name + ":" + playerScore;\n  }\n}\n\nGame g1 = new Game("Alice", 100);\nGame g2 = new Game("Bob", 200);\ng1.bonus(50);\nSystem.out.println(g1 + " | " + g2 +\n                   " | total=" + Game.getTotal());',
+    options:["Alice:150 | Bob:200 | total=350","Alice:150 | Bob:200 | total=400","Alice:100 | Bob:200 | total=350","Alice:150 | Bob:200 | total=300"],
+    answer:0,
+    explanation:"After construction: totalScore=300. g1.bonus(50): playerScore 100→150, totalScore 300→350. g2 unchanged at 200. Output: Alice:150 | Bob:200 | total=350."
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const shuffled = shuffle([...questions]);
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
+
+function escCode(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+
+function diffLabel(d) {
+  if (d === 'easy')   return '<span class="difficulty diff-easy">easy</span>';
+  if (d === 'medium') return '<span class="difficulty diff-medium">medium</span>';
+  return '<span class="difficulty diff-hard">hard</span>';
+}
+
+function render() {
+  const root = document.getElementById('quiz-root');
+  if (current >= shuffled.length) {
+    const pct = Math.round((score / shuffled.length) * 100);
+    const msg = pct >= 90 ? "Outstanding! You have a strong command of Java OOP." :
+                pct >= 75 ? "Great job! A few tricky spots to revisit." :
+                pct >= 55 ? "Decent effort — focus on code-tracing and polymorphism." :
+                            "Keep at it! Work through the hard questions carefully and try again.";
+    root.innerHTML = `<h1>Java Quiz</h1>
+      <p class="subtitle">40 questions · Arrays, Inheritance, Polymorphism, Static vs Instance, Code Analysis</p>
+      <div class="score-card">
+        <div class="score-num">${score}/${shuffled.length}</div>
+        <div class="score-label">${pct}% correct</div>
+        <div class="score-breakdown">Questions answered: ${shuffled.length}</div>
+        <div class="score-msg">${msg}</div>
+        <button class="restart-btn" onclick="restartQuiz()">Try again</button>
+      </div>`;
+    return;
+  }
+  const q = shuffled[current];
+  const pct = (current / shuffled.length) * 100;
+  root.innerHTML = `
+    <h1>Java Quiz</h1>
+    <p class="subtitle">40 questions · Arrays, Inheritance, Polymorphism, Static vs Instance, Code Analysis</p>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    <div class="q-meta">Question ${current + 1} of ${shuffled.length}</div>
+    <span class="tag">${q.tag}</span>${diffLabel(q.difficulty || 'medium')}
+    <div class="q-text">${escHtml(q.text)}</div>
+    ${q.code ? `<div class="q-code">${escCode(q.code)}</div>` : ''}
+    <div class="options" id="opts">
+      ${q.options.map((o,i) => `<button class="opt-btn" id="opt${i}" onclick="pick(${i})">${escHtml(o)}</button>`).join('')}
+    </div>
+    <div id="feedback" style="display:none"></div>
+    <div class="nav-row"><button class="next-btn" id="nxt" style="display:none" onclick="nextQ()">Next &rarr;</button></div>
+  `;
+  answered = false;
+}
+
+function pick(idx) {
+  if (answered) return;
+  answered = true;
+  const q = shuffled[current];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+  if (idx === q.answer) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.innerHTML = '&#10003; Correct! ' + escHtml(q.explanation);
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.answer].classList.add('reveal');
+    fb.className = 'feedback wrong';
+    fb.innerHTML = '&#10007; Not quite. ' + escHtml(q.explanation);
+  }
+  fb.style.display = 'block';
+  document.getElementById('nxt').style.display = 'inline-block';
+}
+
+function nextQ() { current++; render(); }
+
+function restartQuiz() {
+  current = 0; score = 0;
+  shuffle(shuffled);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
