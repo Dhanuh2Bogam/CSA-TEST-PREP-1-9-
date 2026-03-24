@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java FRQ Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1410;
+  --paper: #f5f0e8;
+  --cream: #ede8dc;
+  --ruled: #ddd8cc;
+  --accent: #c1440e;
+  --accent2: #2a6b4f;
+  --accent3: #1e4a7a;
+  --muted: #7a7060;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Fraunces', Georgia, serif;
+  --border: #ccc5b0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  min-height: 100vh;
+}
+
+/* Paper texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 27px,
+    rgba(180,170,150,0.18) 27px, rgba(180,170,150,0.18) 28px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Left red margin line */
+body::after {
+  content: '';
+  position: fixed;
+  left: 72px;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: rgba(193,68,14,0.25);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Header ── */
+header {
+  position: relative;
+  z-index: 10;
+  padding: 40px 60px 28px 100px;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {}
+
+.exam-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--muted);
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.score-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent2);
+  background: rgba(42,107,79,0.1);
+  border: 1px solid rgba(42,107,79,0.3);
+  padding: 6px 16px;
+  border-radius: 2px;
+}
+
+.q-counter {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+/* ── Nav ── */
+nav {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  gap: 0;
+  padding: 0 60px 0 100px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  background: rgba(245,240,232,0.95);
+}
+
+.nav-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 14px 22px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  bottom: -1px;
+}
+
+.nav-btn:hover { color: var(--ink); }
+
+.nav-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.nav-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  font-size: 9px;
+  margin-right: 8px;
+  color: var(--muted);
+}
+
+.nav-btn.active .nav-num {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ── Main ── */
+main {
+  position: relative;
+  z-index: 10;
+  padding: 48px 60px 80px 100px;
+  max-width: 960px;
+}
+
+.frq-section { display: none; }
+.frq-section.active { display: block; }
+
+/* ── FRQ Question block ── */
+.frq-preamble {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent3);
+  border-radius: 2px;
+  padding: 24px 28px;
+  margin-bottom: 36px;
+}
+
+.preamble-tag {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent3);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.preamble-title {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.preamble-desc {
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--ink);
+}
+
+pre {
+  background: #1e1a14;
+  border: 1px solid #3a3328;
+  border-radius: 4px;
+  padding: 18px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.75;
+  color: #e8dfc8;
+  overflow-x: auto;
+  margin: 14px 0;
+  white-space: pre;
+}
+
+.kw { color: #f97b58; }
+.cls { color: #7ec8e3; }
+.str { color: #b5d99c; }
+.cmt { color: #6b6252; font-style: italic; }
+.num { color: #f2cc60; }
+.mth { color: #d4a8ff; }
+.typ { color: #ffa657; }
+.ann { color: #7ec8e3; font-style: italic; }
+
+/* ── Parts ── */
+.part {
+  margin-bottom: 32px;
+  animation: slideIn 0.35s ease both;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.part-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.part-label {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 28px;
+}
+
+.part-points {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.part-question {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--ink);
+  padding-left: 40px;
+}
+
+.answer-area {
+  margin-top: 12px;
+  padding-left: 40px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  background: white;
+  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
+  border-radius: 2px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--ink);
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent3);
+  box-shadow: 0 2px 0 var(--accent3);
+}
+
+textarea.graded { background: #fafaf8; }
+
+/* ── Buttons ── */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.btn-grade {
+  background: var(--accent3);
+  color: white;
+  border: 1px solid var(--accent3);
+}
+
+.btn-grade:hover { background: #163960; }
+.btn-grade:disabled { opacity: 0.5; cursor: default; }
+
+.btn-reveal {
+  background: transparent;
+  color: var(--accent2);
+  border: 1px solid var(--accent2);
+}
+
+.btn-reveal:hover { background: rgba(42,107,79,0.08); }
+
+.btn-next {
+  background: var(--accent);
+  color: white;
+  border: 1px solid var(--accent);
+  margin-left: auto;
+}
+
+.btn-next:hover { background: #a33a0c; }
+
+.btn-reset {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.btn-reset:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── Feedback bubble ── */
+.feedback-wrap {
+  margin-top: 14px;
+  display: none;
+}
+
+.feedback-wrap.show { display: block; }
+
+.feedback-box {
+  border-radius: 3px;
+  padding: 16px 18px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.fb-score-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.fb-score-badge {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.fb-label-text {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.fb-rubric { margin-top: 10px; }
+
+.fb-rubric-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.fb-check { min-width: 16px; font-size: 13px; }
+
+.feedback-excellent {
+  background: rgba(42,107,79,0.07);
+  border: 1px solid rgba(42,107,79,0.25);
+}
+
+.feedback-excellent .fb-score-badge { color: var(--accent2); }
+.feedback-excellent .fb-label-text { color: var(--accent2); }
+
+.feedback-partial {
+  background: rgba(193,68,14,0.06);
+  border: 1px solid rgba(193,68,14,0.2);
+}
+
+.feedback-partial .fb-score-badge { color: var(--accent); }
+.feedback-partial .fb-label-text { color: var(--accent); }
+
+.feedback-missing {
+  background: rgba(100,80,60,0.07);
+  border: 1px solid rgba(100,80,60,0.2);
+}
+
+.feedback-missing .fb-score-badge { color: var(--muted); }
+.feedback-missing .fb-label-text { color: var(--muted); }
+
+.feedback-reveal {
+  background: rgba(30,74,122,0.07);
+  border: 1px solid rgba(30,74,122,0.25);
+}
+
+.feedback-reveal .fb-score-badge { color: var(--accent3); }
+.feedback-reveal .fb-label-text { color: var(--accent3); }
+
+.model-answer {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.model-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ── Section footer ── */
+.section-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.section-score-display {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.section-score-display strong {
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* ── Loading spinner ── */
+.grading-indicator {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.grading-indicator.show { display: flex; }
+
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent3);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Progress dots ── */
+.progress-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.p-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s;
+}
+
+.p-dot.done { background: var(--accent2); }
+.p-dot.partial { background: var(--accent); }
+.p-dot.revealed { background: var(--accent3); }
+
+/* ── Divider ── */
+.part-divider {
+  height: 1px;
+  background: var(--ruled);
+  margin: 28px 0;
+}
+
+@media (max-width: 700px) {
+  body::after { left: 0; }
+  header, nav, main { padding-left: 20px; padding-right: 20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="exam-label">// Free Response Questions</div>
+    <h1>Java OOP <em>Practice Exam</em></h1>
+  </div>
+  <div class="header-right">
+    <div class="score-pill" id="globalScore">Points: 0 / 0</div>
+    <div class="q-counter" id="qCounter">0 of 4 questions attempted</div>
+    <div class="progress-dots" id="progressDots">
+      <div class="p-dot" id="dot-0"></div>
+      <div class="p-dot" id="dot-1"></div>
+      <div class="p-dot" id="dot-2"></div>
+      <div class="p-dot" id="dot-3"></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="showFRQ(0, this)">
+    <span class="nav-num">1</span>Inheritance Hierarchy
+  </button>
+  <button class="nav-btn" onclick="showFRQ(1, this)">
+    <span class="nav-num">2</span>Constructors & Encapsulation
+  </button>
+  <button class="nav-btn" onclick="showFRQ(2, this)">
+    <span class="nav-num">3</span>2D Array Methods
+  </button>
+  <button class="nav-btn" onclick="showFRQ(3, this)">
+    <span class="nav-num">4</span>Full Class Design
+  </button>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FRQ 1 — Inheritance Hierarchy
+════════════════════════════════════════════════════════════ -->
+<div class="frq-section active" id="frq-0">
+  <div class="frq-preamble">
+    <div class="preamble-tag">Question 1 · Inheritance & Polymorphism · 9 points</div>
+    <div class="preamble-title">Media Player Hierarchy</div>
+    <div class="preamble-desc">
+      Consider the following class hierarchy for a media player application. Read each class carefully before answering the parts below.
+    </div>
+    <pre><span class="kw">public class</span> <span class="cls">Media</span> {
+    <span class="kw">private</span> String title;
+    <span class="kw">private int</span> duration; <span class="cmt">// in seconds</span>
+
+    <span class="kw">public</span> <span class="cls">Media</span>(String title, <span class="typ">int</span> duration) {
+        <span class="kw">this</span>.title = title;
+        <span class="kw">this</span>.duration = duration;
+    }
+    <span class="kw">public</span> String <span class="mth">getTitle</span>() { <span class="kw">return</span> title; }
+    <span class="kw">public int</span>    <span class="mth">getDuration</span>() { <span class="kw">return</span> duration; }
+    <span class="kw">public</span> String <span class="mth">toString</span>() { <span class="kw">return</span> title + <span class="str">" ("</span> + duration + <span class="str">"s)"</span>; }
+    <span class="kw">public void</span>   <span class="mth">play</span>() { System.out.println(<span class="str">"Playing: "</span> + title); }
+}
+
+<span class="kw">public class</span> <span class="cls">Song</span> <span class="kw">extends</span> <span class="cls">Media</span> {
+    <span class="kw">private</span> String artist;
+
+    <span class="kw">public</span> <span class="cls">Song</span>(String title, <span class="typ">int</span> duration, String artist) {
+        <span class="kw">super</span>(title, duration);
+        <span class="kw">this</span>.artist = artist;
+    }
+    <span class="kw">public</span> String <span class="mth">getArtist</span>() { <span class="kw">return</span> artist; }
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="mth">play</span>() {
+        <span class="kw">super</span>.<span class="mth">play</span>();
+        System.out.println(<span class="str">"  by "</span> + artist);
+    }
+}
+
+<span class="kw">public class</span> <span class="cls">Podcast</span> <span class="kw">extends</span> <span class="cls">Media</span> {
+    <span class="kw">private int</span> episodeNumber;
+
+    <span class="kw">public</span> <span class="cls">Podcast</span>(String title, <span class="typ">int</span> duration, <span class="typ">int</span> ep) {
+        <span class="kw">super</span>(title, duration);
+        episodeNumber = ep;
+    }
+    <span class="ann">@Override</span>
+    <span class="kw">public</span> String <span class="mth">toString</span>() {
+        <span class="kw">return</span> <span class="str">"Ep."</span> + episodeNumber + <span class="str">": "</span> + <span class="kw">super</span>.<span class="mth">toString</span>();
+    }
+}</pre>
+  </div>
+
+  <!-- Part A -->
+  <div class="part" id="p-0-a">
+    <div class="part-header">
+      <span class="part-label">(a)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      Consider the following client code. What is printed? Explain each line of output, specifically identifying which method is called and on which object.
+      <pre><span class="cls">Media</span>[] playlist = {
+    <span class="kw">new</span> <span class="cls">Song</span>(<span class="str">"Bohemian Rhapsody"</span>, <span class="num">354</span>, <span class="str">"Queen"</span>),
+    <span class="kw">new</span> <span class="cls">Podcast</span>(<span class="str">"Tech Talk"</span>, <span class="num">1800</span>, <span class="num">42</span>),
+    <span class="kw">new</span> <span class="cls">Media</span>(<span class="str">"Intro"</span>, <span class="num">10</span>)
+};
+<span class="kw">for</span> (<span class="cls">Media</span> m : playlist) {
+    m.<span class="mth">play</span>();
+    System.out.println(m);
+}</pre>
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-0-a" placeholder="Write the exact output and explain which version of each method runs for each object..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('0-a', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('0-a')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-0-a"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-0-a"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <!-- Part B -->
+  <div class="part" id="p-0-b">
+    <div class="part-header">
+      <span class="part-label">(b)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      Write a static method <code>totalDuration(Media[] arr)</code> that returns the total duration (in seconds) of all <code>Media</code> objects in the array. Then write a second static method <code>longestMedia(Media[] arr)</code> that returns the <code>Media</code> object with the greatest duration. Assume the array has at least one element.
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-0-b" placeholder="public static int totalDuration(Media[] arr) { ... }&#10;public static Media longestMedia(Media[] arr) { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('0-b', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('0-b')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-0-b"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-0-b"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <!-- Part C -->
+  <div class="part" id="p-0-c">
+    <div class="part-header">
+      <span class="part-label">(c)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      Write a class <code>VideoClip</code> that extends <code>Media</code>. It should store a <code>resolution</code> (a String, e.g. <code>"1080p"</code>). Override <code>play()</code> to first call the parent's <code>play()</code> and then print <code>"Resolution: 1080p"</code>. Override <code>toString()</code> to return <code>"[Video] Bohemian Rhapsody (354s) @ 1080p"</code>.
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-0-c" placeholder="public class VideoClip extends Media { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('0-c', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('0-c')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-0-c"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-0-c"></div>
+    </div>
+  </div>
+
+  <div class="section-footer">
+    <button class="btn btn-reset" onclick="resetFRQ(0)">↺ Reset Question</button>
+    <div class="section-score-display">Question 1: <strong id="sec-score-0">0 / 9 pts</strong></div>
+    <button class="btn btn-next" onclick="showFRQ(1, document.querySelectorAll('.nav-btn')[1])">Next Question →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FRQ 2 — Constructors & Encapsulation
+════════════════════════════════════════════════════════════ -->
+<div class="frq-section" id="frq-1">
+  <div class="frq-preamble">
+    <div class="preamble-tag">Question 2 · Constructors & Encapsulation · 10 points</div>
+    <div class="preamble-title">Bank Account System</div>
+    <div class="preamble-desc">
+      Consider a banking system. A base class <code>Account</code> tracks a balance. A subclass <code>SavingsAccount</code> adds an interest rate.
+    </div>
+    <pre><span class="kw">public class</span> <span class="cls">Account</span> {
+    <span class="kw">private</span> String owner;
+    <span class="kw">private double</span> balance;
+
+    <span class="kw">public</span> <span class="cls">Account</span>(String owner, <span class="typ">double</span> initialBalance) {
+        <span class="kw">this</span>.owner = owner;
+        <span class="kw">this</span>.balance = initialBalance;
+    }
+    <span class="kw">public</span> String <span class="mth">getOwner</span>()   { <span class="kw">return</span> owner; }
+    <span class="kw">public double</span> <span class="mth">getBalance</span>() { <span class="kw">return</span> balance; }
+
+    <span class="kw">public void</span> <span class="mth">deposit</span>(<span class="typ">double</span> amount) {
+        <span class="kw">if</span> (amount > <span class="num">0</span>) balance += amount;
+    }
+    <span class="kw">public boolean</span> <span class="mth">withdraw</span>(<span class="typ">double</span> amount) {
+        <span class="kw">if</span> (amount > <span class="num">0</span> && amount <= balance) {
+            balance -= amount;
+            <span class="kw">return true</span>;
+        }
+        <span class="kw">return false</span>;
+    }
+    <span class="kw">public</span> String <span class="mth">toString</span>() {
+        <span class="kw">return</span> owner + <span class="str">": $"</span> + balance;
+    }
+}</pre>
+  </div>
+
+  <div class="part" id="p-1-a">
+    <div class="part-header">
+      <span class="part-label">(a)</span>
+      <span class="part-points">4 points</span>
+    </div>
+    <div class="part-question">
+      Write the complete <code>SavingsAccount</code> class that extends <code>Account</code>. It should:
+      <ul style="margin-top:8px;margin-left:20px;line-height:2;font-size:13px">
+        <li>Store a <code>private double interestRate</code> (e.g. 0.05 = 5%)</li>
+        <li>Have a constructor that takes owner, initial balance, and interest rate — using <code>super()</code></li>
+        <li>Include an <code>applyInterest()</code> method that adds <code>balance * interestRate</code> to the balance (use <code>deposit()</code>)</li>
+        <li>Override <code>toString()</code> to return <code>"[Savings] Alice: $1050.0 (5.0%)"</code></li>
+      </ul>
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-1-a" placeholder="public class SavingsAccount extends Account { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('1-a', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('1-a')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-1-a"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-1-a"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <div class="part" id="p-1-b">
+    <div class="part-header">
+      <span class="part-label">(b)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      Trace through the following code and state the exact output. Explain why each value is what it is.
+      <pre><span class="cls">Account</span> a = <span class="kw">new</span> <span class="cls">SavingsAccount</span>(<span class="str">"Alice"</span>, <span class="num">1000.0</span>, <span class="num">0.05</span>);
+<span class="cls">Account</span> b = <span class="kw">new</span> <span class="cls">Account</span>(<span class="str">"Bob"</span>, <span class="num">500.0</span>);
+a.<span class="mth">deposit</span>(<span class="num">200.0</span>);
+b.<span class="mth">withdraw</span>(<span class="num">600.0</span>);
+((<span class="cls">SavingsAccount</span>) a).<span class="mth">applyInterest</span>();
+System.out.println(a);
+System.out.println(b);
+System.out.println(b.<span class="mth">withdraw</span>(<span class="num">600.0</span>));</pre>
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-1-b" placeholder="State the exact output and explain each line..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('1-b', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('1-b')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-1-b"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-1-b"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <div class="part" id="p-1-c">
+    <div class="part-header">
+      <span class="part-label">(c)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      A programmer writes the following and gets a compile error on line 2. Explain why, and write corrected code that safely calls <code>applyInterest()</code> only if the account is a <code>SavingsAccount</code>.
+      <pre><span class="cls">Account</span>[] accounts = { <span class="kw">new</span> <span class="cls">SavingsAccount</span>(<span class="str">"A"</span>, <span class="num">100</span>, <span class="num">0.1</span>),
+                         <span class="kw">new</span> <span class="cls">Account</span>(<span class="str">"B"</span>, <span class="num">200</span>) };
+<span class="kw">for</span> (<span class="cls">Account</span> acc : accounts) {
+    acc.<span class="mth">applyInterest</span>(); <span class="cmt">// line 2 — compile error!</span>
+}</pre>
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-1-c" placeholder="Explain the error, then write corrected code using instanceof and casting..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('1-c', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('1-c')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-1-c"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-1-c"></div>
+    </div>
+  </div>
+
+  <div class="section-footer">
+    <button class="btn btn-reset" onclick="resetFRQ(1)">↺ Reset Question</button>
+    <div class="section-score-display">Question 2: <strong id="sec-score-1">0 / 10 pts</strong></div>
+    <button class="btn btn-next" onclick="showFRQ(2, document.querySelectorAll('.nav-btn')[2])">Next Question →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FRQ 3 — 2D Array Methods
+════════════════════════════════════════════════════════════ -->
+<div class="frq-section" id="frq-2">
+  <div class="frq-preamble">
+    <div class="preamble-tag">Question 3 · 2D Arrays · 10 points</div>
+    <div class="preamble-title">Grade Book</div>
+    <div class="preamble-desc">
+      A teacher stores student grades in a 2D <code>int</code> array where each row represents one student and each column represents one assignment. Rows may have different lengths (jagged arrays).
+    </div>
+    <pre><span class="cmt">// grades[student][assignment]</span>
+<span class="typ">int</span>[][] grades = {
+    {<span class="num">85</span>, <span class="num">90</span>, <span class="num">78</span>, <span class="num">92</span>},   <span class="cmt">// Student 0</span>
+    {<span class="num">70</span>, <span class="num">65</span>, <span class="num">80</span>},        <span class="cmt">// Student 1</span>
+    {<span class="num">95</span>, <span class="num">100</span>, <span class="num">98</span>, <span class="num">99</span>, <span class="num">97</span>} <span class="cmt">// Student 2</span>
+};</pre>
+  </div>
+
+  <div class="part" id="p-2-a">
+    <div class="part-header">
+      <span class="part-label">(a)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      Write a static method <code>studentAverage(int[][] grades, int student)</code> that returns the average grade for the given student index as a <code>double</code>. Do not use any built-in library methods.
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-2-a" placeholder="public static double studentAverage(int[][] grades, int student) { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('2-a', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('2-a')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-2-a"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-2-a"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <div class="part" id="p-2-b">
+    <div class="part-header">
+      <span class="part-label">(b)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      Write a static method <code>curveGrades(int[][] grades, int bonus)</code> that returns a NEW 2D array where every grade has been increased by <code>bonus</code> points, capped at 100. The original array must not be modified.
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-2-b" placeholder="public static int[][] curveGrades(int[][] grades, int bonus) { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('2-b', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('2-b')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-2-b"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-2-b"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <div class="part" id="p-2-c">
+    <div class="part-header">
+      <span class="part-label">(c)</span>
+      <span class="part-points">4 points</span>
+    </div>
+    <div class="part-question">
+      Write a static method <code>topStudents(int[][] grades, double minAvg)</code> that returns a new <code>int[]</code> array containing the indices of all students whose average grade (computed using your method from part a) is at least <code>minAvg</code>. If no students qualify, return an empty array. You may call <code>studentAverage</code>.
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-2-c" placeholder="public static int[] topStudents(int[][] grades, double minAvg) { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('2-c', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('2-c')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-2-c"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-2-c"></div>
+    </div>
+  </div>
+
+  <div class="section-footer">
+    <button class="btn btn-reset" onclick="resetFRQ(2)">↺ Reset Question</button>
+    <div class="section-score-display">Question 3: <strong id="sec-score-2">0 / 10 pts</strong></div>
+    <button class="btn btn-next" onclick="showFRQ(3, document.querySelectorAll('.nav-btn')[3])">Next Question →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FRQ 4 — Full Class Design
+════════════════════════════════════════════════════════════ -->
+<div class="frq-section" id="frq-3">
+  <div class="frq-preamble">
+    <div class="preamble-tag">Question 4 · Full Design · 11 points</div>
+    <div class="preamble-title">Inventory System</div>
+    <div class="preamble-desc">
+      In this question, you will design and implement an entire class hierarchy from scratch based on a specification.
+    </div>
+  </div>
+
+  <div class="part" id="p-3-a">
+    <div class="part-header">
+      <span class="part-label">(a)</span>
+      <span class="part-points">4 points</span>
+    </div>
+    <div class="part-question">
+      Write a class <code>Product</code> with:
+      <ul style="margin-top:8px;margin-left:20px;line-height:2;font-size:13px">
+        <li>Private fields: <code>String name</code>, <code>double price</code>, <code>int quantity</code></li>
+        <li>A constructor taking all three fields</li>
+        <li>Getters for all three fields</li>
+        <li>A <code>restock(int amount)</code> method that adds to quantity (ignore negatives)</li>
+        <li>A <code>sell(int amount)</code> method that subtracts from quantity only if enough stock exists; returns <code>true</code> if successful</li>
+        <li><code>toString()</code> returning <code>"Widget - $9.99 (50 in stock)"</code></li>
+      </ul>
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-3-a" placeholder="public class Product { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('3-a', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('3-a')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-3-a"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-3-a"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <div class="part" id="p-3-b">
+    <div class="part-header">
+      <span class="part-label">(b)</span>
+      <span class="part-points">3 points</span>
+    </div>
+    <div class="part-question">
+      Write a subclass <code>PerishableProduct</code> that extends <code>Product</code>. Add a <code>daysUntilExpiry</code> field (int). Override <code>sell()</code> so that if <code>daysUntilExpiry &lt;= 0</code>, the sale always fails (returns false) regardless of quantity. Otherwise delegate to the parent's <code>sell()</code>. Override <code>toString()</code> to append <code>" [expires in N days]"</code>.
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-3-b" placeholder="public class PerishableProduct extends Product { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('3-b', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('3-b')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-3-b"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-3-b"></div>
+    </div>
+  </div>
+
+  <div class="part-divider"></div>
+
+  <div class="part" id="p-3-c">
+    <div class="part-header">
+      <span class="part-label">(c)</span>
+      <span class="part-points">4 points</span>
+    </div>
+    <div class="part-question">
+      Write a static method <code>inventoryReport(Product[] inventory)</code> that:
+      <ul style="margin-top:8px;margin-left:20px;line-height:2;font-size:13px">
+        <li>Prints each product using <code>toString()</code></li>
+        <li>Prints the total inventory value (sum of <code>price * quantity</code> for each product)</li>
+        <li>Prints how many products are expired (for <code>PerishableProduct</code> items where <code>daysUntilExpiry &lt;= 0</code> — use <code>instanceof</code> and casting)</li>
+      </ul>
+    </div>
+    <div class="answer-area">
+      <textarea id="ans-3-c" placeholder="public static void inventoryReport(Product[] inventory) { ... }"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-grade" onclick="gradeAnswer('3-c', this)">Grade with AI</button>
+        <button class="btn btn-reveal" onclick="revealAnswer('3-c')">Show Model Answer</button>
+        <div class="grading-indicator" id="gi-3-c"><div class="spinner"></div>Grading...</div>
+      </div>
+      <div class="feedback-wrap" id="fb-3-c"></div>
+    </div>
+  </div>
+
+  <div class="section-footer">
+    <button class="btn btn-reset" onclick="resetFRQ(3)">↺ Reset Question</button>
+    <div class="section-score-display">Question 4: <strong id="sec-score-3">0 / 11 pts</strong></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const maxPts = { '0-a':3,'0-b':3,'0-c':3, '1-a':4,'1-b':3,'1-c':3, '2-a':3,'2-b':3,'2-c':4, '3-a':4,'3-b':3,'3-c':4 };
+const secMax = { 0:9, 1:10, 2:10, 3:11 };
+const partSec = { '0-a':0,'0-b':0,'0-c':0, '1-a':1,'1-b':1,'1-c':1, '2-a':2,'2-b':2,'2-c':2, '3-a':3,'3-b':3,'3-c':3 };
+const earned = {};
+const attempted = new Set();
+
+// ─── Model Answers ────────────────────────────────────────────────────────────
+const modelAnswers = {
+'0-a': `Output:
+Playing: Bohemian Rhapsody
+  by Queen
+Bohemian Rhapsody (354s)
+Playing: Tech Talk
+Ep.42: Tech Talk (1800s)
+Playing: Intro
+Intro (10s)
+
+Explanation:
+- Song.play() calls super.play() (prints "Playing: Bohemian Rhapsody") then prints "  by Queen"
+- Song has no toString(), so Media.toString() runs → "Bohemian Rhapsody (354s)"
+- Podcast has no play(), so Media.play() runs → "Playing: Tech Talk"
+- Podcast overrides toString() → "Ep.42: Tech Talk (1800s)" (calls super.toString() internally)
+- Plain Media uses both methods directly`,
+
+'0-b': `public static int totalDuration(Media[] arr) {
+    int total = 0;
+    for (Media m : arr) total += m.getDuration();
+    return total;
+}
+
+public static Media longestMedia(Media[] arr) {
+    Media longest = arr[0];
+    for (int i = 1; i < arr.length; i++)
+        if (arr[i].getDuration() > longest.getDuration())
+            longest = arr[i];
+    return longest;
+}`,
+
+'0-c': `public class VideoClip extends Media {
+    private String resolution;
+
+    public VideoClip(String title, int duration, String resolution) {
+        super(title, duration);
+        this.resolution = resolution;
+    }
+
+    @Override
+    public void play() {
+        super.play();
+        System.out.println("Resolution: " + resolution);
+    }
+
+    @Override
+    public String toString() {
+        return "[Video] " + super.toString() + " @ " + resolution;
+    }
+}`,
+
+'1-a': `public class SavingsAccount extends Account {
+    private double interestRate;
+
+    public SavingsAccount(String owner, double balance, double rate) {
+        super(owner, balance);
+        this.interestRate = rate;
+    }
+
+    public void applyInterest() {
+        deposit(getBalance() * interestRate);
+    }
+
+    @Override
+    public String toString() {
+        return "[Savings] " + super.toString() + " (" + (interestRate * 100) + "%)";
+    }
+}`,
+
+'1-b': `Step by step:
+- a starts at $1000, deposit(200) → $1200
+- b.withdraw(600) fails (only $500), returns false, balance stays $500
+- applyInterest(): deposit(1200 * 0.05) = deposit(60) → a = $1260
+- a.toString() uses SavingsAccount.toString() → "[Savings] Alice: $1260.0 (5.0%)"
+- b.toString() uses Account.toString() → "Bob: $500.0"
+- b.withdraw(600) fails again → prints false
+
+Output:
+[Savings] Alice: $1260.0 (5.0%)
+Bob: $500.0
+false`,
+
+'1-c': `Error: applyInterest() is defined in SavingsAccount, not in Account.
+The compiler only sees Account's methods on an Account-typed variable,
+so calling acc.applyInterest() fails at compile time.
+
+Fix using instanceof and downcast:
+for (Account acc : accounts) {
+    if (acc instanceof SavingsAccount) {
+        ((SavingsAccount) acc).applyInterest();
+    }
+}`,
+
+'2-a': `public static double studentAverage(int[][] grades, int student) {
+    int sum = 0;
+    for (int g : grades[student]) sum += g;
+    return (double) sum / grades[student].length;
+}`,
+
+'2-b': `public static int[][] curveGrades(int[][] grades, int bonus) {
+    int[][] result = new int[grades.length][];
+    for (int r = 0; r < grades.length; r++) {
+        result[r] = new int[grades[r].length];
+        for (int c = 0; c < grades[r].length; c++) {
+            result[r][c] = Math.min(100, grades[r][c] + bonus);
+        }
+    }
+    return result;
+}`,
+
+'2-c': `public static int[] topStudents(int[][] grades, double minAvg) {
+    int count = 0;
+    for (int i = 0; i < grades.length; i++)
+        if (studentAverage(grades, i) >= minAvg) count++;
+
+    int[] result = new int[count];
+    int idx = 0;
+    for (int i = 0; i < grades.length; i++)
+        if (studentAverage(grades, i) >= minAvg) result[idx++] = i;
+
+    return result;
+}`,
+
+'3-a': `public class Product {
+    private String name;
+    private double price;
+    private int quantity;
+
+    public Product(String name, double price, int quantity) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+    }
+
+    public String getName()   { return name; }
+    public double getPrice()  { return price; }
+    public int getQuantity()  { return quantity; }
+
+    public void restock(int amount) {
+        if (amount > 0) quantity += amount;
+    }
+
+    public boolean sell(int amount) {
+        if (amount > 0 && amount <= quantity) {
+            quantity -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    public String toString() {
+        return name + " - $" + price + " (" + quantity + " in stock)";
+    }
+}`,
+
+'3-b': `public class PerishableProduct extends Product {
+    private int daysUntilExpiry;
+
+    public PerishableProduct(String name, double price, int qty, int days) {
+        super(name, price, qty);
+        this.daysUntilExpiry = days;
+    }
+
+    @Override
+    public boolean sell(int amount) {
+        if (daysUntilExpiry <= 0) return false;
+        return super.sell(amount);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " [expires in " + daysUntilExpiry + " days]";
+    }
+}`,
+
+'3-c': `public static void inventoryReport(Product[] inventory) {
+    double totalValue = 0;
+    int expiredCount = 0;
+
+    for (Product p : inventory) {
+        System.out.println(p);
+        totalValue += p.getPrice() * p.getQuantity();
+        if (p instanceof PerishableProduct) {
+            PerishableProduct pp = (PerishableProduct) p;
+            if (pp.getDaysUntilExpiry() <= 0) expiredCount++;
+        }
+    }
+
+    System.out.println("Total value: $" + totalValue);
+    System.out.println("Expired items: " + expiredCount);
+}`
+};
+
+// ─── AI Grading prompts ────────────────────────────────────────────────────────
+const rubrics = {
+'0-a': `Grade this student's answer to a Java FRQ about method output tracing.
+Max points: 3.
+Rubric:
+- 1pt: Correct output for Song (play prints both lines, toString uses Media's version)
+- 1pt: Correct output for Podcast (play uses Media's, toString uses Podcast's override with super call)
+- 1pt: Clear explanation of dynamic dispatch / which override runs for each object
+Model answer: ${modelAnswers['0-a']}`,
+
+'0-b': `Grade this Java FRQ answer. Max points: 3.
+Rubric:
+- 1pt: totalDuration correctly sums getDuration() for all elements
+- 1pt: longestMedia initializes to arr[0] and compares getDuration() correctly
+- 1pt: Both methods have correct return type and handle array traversal properly
+Model answer: ${modelAnswers['0-b']}`,
+
+'0-c': `Grade this Java FRQ answer. Max points: 3.
+Rubric:
+- 1pt: Correct extends Media, constructor calls super(title, duration), stores resolution
+- 1pt: play() calls super.play() first then prints "Resolution: " + resolution
+- 1pt: toString() returns "[Video] " + super.toString() + " @ " + resolution
+Model answer: ${modelAnswers['0-c']}`,
+
+'1-a': `Grade this Java FRQ answer. Max points: 4.
+Rubric:
+- 1pt: Private interestRate field declared
+- 1pt: Constructor calls super(owner, balance) and sets interestRate
+- 1pt: applyInterest() calls deposit(getBalance() * interestRate) — must use deposit(), not direct field access
+- 1pt: toString() calls super.toString() and formats correctly with percentage
+Model answer: ${modelAnswers['1-a']}`,
+
+'1-b': `Grade this Java FRQ answer. Max points: 3.
+Rubric:
+- 1pt: Correctly identifies that b.withdraw(600) fails (insufficient funds), balance stays 500
+- 1pt: Correctly computes applyInterest result: 1200 * 0.05 = 60 added → 1260
+- 1pt: Correct final output for all three print statements including the SavingsAccount toString format
+Model answer: ${modelAnswers['1-b']}`,
+
+'1-c': `Grade this Java FRQ answer. Max points: 3.
+Rubric:
+- 1pt: Correctly explains compile error: applyInterest() not in Account, compiler uses declared type
+- 1pt: Uses instanceof check before casting
+- 1pt: Correct cast to SavingsAccount before calling applyInterest()
+Model answer: ${modelAnswers['1-c']}`,
+
+'2-a': `Grade this Java FRQ answer. Max points: 3.
+Rubric:
+- 1pt: Accesses the correct row grades[student]
+- 1pt: Correctly sums all elements in that row
+- 1pt: Divides by row length with correct cast to double
+Model answer: ${modelAnswers['2-a']}`,
+
+'2-b': `Grade this Java FRQ answer. Max points: 3.
+Rubric:
+- 1pt: Creates NEW 2D array (not modifying original) — must allocate result[r] for each row
+- 1pt: Adds bonus to each element
+- 1pt: Caps at 100 using Math.min or equivalent conditional
+Model answer: ${modelAnswers['2-b']}`,
+
+'2-c': `Grade this Java FRQ answer. Max points: 4.
+Rubric:
+- 1pt: Calls studentAverage (or equivalent logic) to compute average per student
+- 1pt: Correctly counts how many students qualify first (or uses dynamic structure like ArrayList)
+- 1pt: Returns array of correct indices (not values)
+- 1pt: Returns empty array (not null) when no students qualify
+Model answer: ${modelAnswers['2-c']}`,
+
+'3-a': `Grade this Java FRQ answer. Max points: 4.
+Rubric:
+- 1pt: All three private fields declared correctly
+- 1pt: Constructor and getters correct
+- 1pt: restock ignores negative amounts; sell checks quantity and returns boolean correctly
+- 1pt: toString() matches specified format
+Model answer: ${modelAnswers['3-a']}`,
+
+'3-b': `Grade this Java FRQ answer. Max points: 3.
+Rubric:
+- 1pt: Extends Product, constructor calls super() with all three Product fields plus stores daysUntilExpiry
+- 1pt: sell() returns false if expired (daysUntilExpiry <= 0), otherwise calls super.sell()
+- 1pt: toString() calls super.toString() and appends the expiry string
+Model answer: ${modelAnswers['3-b']}`,
+
+'3-c': `Grade this Java FRQ answer. Max points: 4.
+Rubric:
+- 1pt: Prints each product (toString called via println)
+- 1pt: Correctly computes total value as sum of price * quantity
+- 1pt: Uses instanceof PerishableProduct correctly
+- 1pt: Counts only expired items (daysUntilExpiry <= 0) after casting
+Model answer: ${modelAnswers['3-c']}`
+};
+
+// ─── AI Grading ───────────────────────────────────────────────────────────────
+async function gradeAnswer(partId, btn) {
+  const studentAnswer = document.getElementById('ans-' + partId).value.trim();
+  if (!studentAnswer) {
+    alert('Please write an answer before grading.');
+    return;
+  }
+
+  btn.disabled = true;
+  const gi = document.getElementById('gi-' + partId);
+  gi.classList.add('show');
+
+  const rubric = rubrics[partId];
+  const max = maxPts[partId];
+
+  const prompt = `You are grading a Java programming FRQ (free response question) for a CS student.
+
+${rubric}
+
+Student's answer:
+"""
+${studentAnswer}
+"""
+
+Grade the student's answer based ONLY on the rubric above. Be encouraging but accurate. Award partial credit generously when the student shows understanding even if syntax is slightly off.
+
+Respond with EXACTLY this JSON format (no markdown, no extra text):
+{
+  "score": <integer 0 to ${max}>,
+  "label": "<one of: Excellent|Good|Partial Credit|Needs Work>",
+  "rubric_items": [
+    {"earned": true/false, "text": "brief description of this rubric point"},
+    ...
+  ],
+  "feedback": "<2-3 sentence constructive feedback>"
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content?.find(b => b.type === 'text')?.text || '{}';
+    let result;
+    try {
+      result = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    } catch {
+      result = { score: 0, label: 'Error', rubric_items: [], feedback: 'Could not parse response. Please try again.' };
+    }
+
+    showFeedback(partId, result, max);
+    recordScore(partId, result.score, max, 'graded');
+  } catch (err) {
+    gi.classList.remove('show');
+    btn.disabled = false;
+    alert('Grading failed. Check your connection and try again.');
+  } finally {
+    gi.classList.remove('show');
+  }
+}
+
+function showFeedback(partId, result, max) {
+  const fb = document.getElementById('fb-' + partId);
+  const pct = result.score / max;
+  let cls = pct >= 0.85 ? 'feedback-excellent' : pct >= 0.5 ? 'feedback-partial' : 'feedback-missing';
+
+  const rubricsHtml = (result.rubric_items || []).map(item =>
+    `<div class="fb-rubric-item">
+      <span class="fb-check">${item.earned ? '✓' : '✗'}</span>
+      <span style="color: ${item.earned ? 'var(--accent2)' : 'var(--muted)'}">${item.text}</span>
+    </div>`
+  ).join('');
+
+  fb.innerHTML = `<div class="feedback-box ${cls}">
+    <div class="fb-score-row">
+      <div class="fb-score-badge">${result.score}/${max}</div>
+      <div class="fb-label-text">${result.label || ''}</div>
+    </div>
+    <div class="fb-rubric">${rubricsHtml}</div>
+    <div style="margin-top:12px;font-size:12px;line-height:1.8;color:var(--ink)">${result.feedback || ''}</div>
+  </div>`;
+  fb.classList.add('show');
+  document.getElementById('ans-' + partId).classList.add('graded');
+}
+
+function revealAnswer(partId) {
+  const fb = document.getElementById('fb-' + partId);
+  const model = modelAnswers[partId] || '';
+  const max = maxPts[partId];
+
+  fb.innerHTML = `<div class="feedback-box feedback-reveal">
+    <div class="fb-score-row">
+      <div class="fb-score-badge" style="font-size:1.1rem">Model Answer</div>
+      <div class="fb-label-text">Revealed — no points awarded</div>
+    </div>
+    <div class="model-answer">
+      <div class="model-label">Reference Solution</div>
+      <pre style="margin:0;font-size:11px">${escHtml(model)}</pre>
+    </div>
+  </div>`;
+  fb.classList.add('show');
+
+  if (!attempted.has(partId)) {
+    recordScore(partId, 0, max, 'revealed');
+  }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── Score tracking ───────────────────────────────────────────────────────────
+function recordScore(partId, pts, max, type) {
+  attempted.add(partId);
+  earned[partId] = pts;
+
+  const sec = partSec[partId];
+  updateSectionScore(sec);
+  updateGlobalScore();
+  updateDot(sec, type, pts, max);
+  updateQCounter();
+}
+
+function updateSectionScore(sec) {
+  const parts = Object.keys(partSec).filter(k => partSec[k] === sec);
+  let got = 0;
+  parts.forEach(p => { if (earned[p] !== undefined) got += earned[p]; });
+  document.getElementById('sec-score-' + sec).textContent = got + ' / ' + secMax[sec] + ' pts';
+}
+
+function updateGlobalScore() {
+  let got = 0, tot = 0;
+  Object.keys(earned).forEach(k => { got += earned[k]; });
+  Object.values(maxPts).forEach(v => tot += v);
+  const attempted_total = Object.keys(earned).length * (Object.values(maxPts).reduce((a,b)=>a+b,0) / Object.keys(maxPts).length);
+  document.getElementById('globalScore').textContent = `Points: ${got} / ${Object.values(maxPts).reduce((a,b)=>a+b,0)}`;
+}
+
+function updateDot(sec, type, pts, max) {
+  const dot = document.getElementById('dot-' + sec);
+  if (type === 'revealed') { dot.classList.add('revealed'); return; }
+  const pct = pts / max;
+  if (pct >= 0.7) dot.classList.add('done');
+  else dot.classList.add('partial');
+}
+
+function updateQCounter() {
+  const secs = new Set(Object.keys(earned).map(k => partSec[k]));
+  document.getElementById('qCounter').textContent = `${secs.size} of 4 questions attempted`;
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function showFRQ(idx, btn) {
+  document.querySelectorAll('.frq-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('frq-' + idx).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetFRQ(idx) {
+  const parts = Object.keys(partSec).filter(k => partSec[k] === idx);
+  parts.forEach(p => {
+    delete earned[p];
+    attempted.delete(p);
+    const ta = document.getElementById('ans-' + p);
+    if (ta) { ta.value = ''; ta.classList.remove('graded'); }
+    const fb = document.getElementById('fb-' + p);
+    if (fb) { fb.innerHTML = ''; fb.classList.remove('show'); }
+    const btn = document.querySelector(`[onclick="gradeAnswer('${p}', this)"]`);
+    if (btn) btn.disabled = false;
+  });
+
+  const dot = document.getElementById('dot-' + idx);
+  dot.className = 'p-dot';
+  updateSectionScore(idx);
+  updateGlobalScore();
+  updateQCounter();
+}
+</script>
+</body>
+</html>
